@@ -42,9 +42,12 @@ class TwitchWorld(World):
             checks = options["d" + str(sides) + "_checks"]
             for i in range(checks + 1, sides + 1):
                 check_str = "D" + str(sides) + ": Mystery Number " + str(i)
-                print(check_str)
                 del location_data_table[check_str]
                 del location_table[check_str]
+        for i in range(options["rps_checks"] + 1, 11):
+            check_str = "RPS: Check " + str(i)
+            del location_data_table[check_str]
+            del location_table[check_str]
     
     def create_item(self, name: str) -> TwitchItem:
         return TwitchItem(name, item_data_table[name].type, item_data_table[name].code, self.player)
