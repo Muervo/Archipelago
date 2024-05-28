@@ -15,7 +15,7 @@ class TwitchItemData(NamedTuple):
 
 
 item_data_table: Dict[str, TwitchItemData] = {
-    "trug's love": TwitchItemData(
+    "out of pocket trug comment": TwitchItemData(
         code=7339999
     ),
     "D6": TwitchItemData(

@@ -57,6 +57,7 @@ dice = [6, 8, 10, 12, 15]
 
 for sides in dice:
     for i in range(1, sides + 1):
+        print("address: " + str(7330000 + sides*100 + i))
         location_data_table["D" + str(sides) + ": Mystery Number " + str(i)] = TwitchLocationData(address=7330000 + sides*100 + i)
 
 for i in range(1, 11):

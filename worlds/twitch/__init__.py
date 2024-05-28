@@ -42,7 +42,7 @@ class TwitchWorld(World):
             checks = options["d" + str(sides) + "_checks"]
             for i in range(checks + 1, sides + 1):
                 check_str = "D" + str(sides) + ": Mystery Number " + str(i)
-                print(location_data_table)
+                print(check_str)
                 del location_data_table[check_str]
                 del location_table[check_str]
     
@@ -55,7 +55,7 @@ class TwitchWorld(World):
         for name, item in item_data_table.items():
             if name not in item_pool_count:
                 item_pool_count[name] = 0
-            if item.code and item.can_create(self.multiworld, self.player) and (item_pool_count[name] < item.num_exist):
+            if item.code and item.can_create(self.multiworld, self.player):
                 item_pool.append(self.create_item(name))
                 item_pool_count[name] += 1
 
@@ -86,7 +86,7 @@ class TwitchWorld(World):
             self.multiworld.get_location(location_name, self.player).place_locked_item(locked_item)
 
     def get_filler_item_name(self) -> str:
-        return "trug's love"
+        return "out of pocket trug comment"
 
     def set_rules(self) -> None:
         options = self.fill_slot_data()
