@@ -4,7 +4,7 @@ from typing import Dict
 from BaseClasses import Region, Tutorial
 from worlds.AutoWorld import WebWorld, World
 from .Items import TwitchItem, item_data_table, item_table
-from .Locations import dice, TwitchLocation, TwitchLocationData, location_data_table, location_table, locked_locations
+from .Locations import dice, MAX_RPS_CHECKS, TwitchLocation, TwitchLocationData, location_data_table, location_table, locked_locations
 from .Options import TwitchOptions
 from .Regions import region_data_table
 #from .Rules import 
@@ -35,8 +35,11 @@ class TwitchWorld(World):
     options: TwitchOptions
     location_name_to_id = location_table
     item_name_to_id = item_table
+    num_locations = 0
+    num_items = 0
 
     def generate_early(self):
+        self.num_locations += 1  # First Chat
         options = self.fill_slot_data()
         for sides in dice:
             checks = options["d" + str(sides) + "_checks"]
@@ -44,7 +47,7 @@ class TwitchWorld(World):
                 check_str = "D" + str(sides) + ": Mystery Number " + str(i)
                 del location_data_table[check_str]
                 del location_table[check_str]
-        for i in range(options["rps_checks"] + 1, 11):
+        for i in range(options["rps_checks"] + 1, MAX_RPS_CHECKS + 1):
             check_str = "RPS: Check " + str(i)
             del location_data_table[check_str]
             del location_table[check_str]
@@ -59,8 +62,16 @@ class TwitchWorld(World):
             if name not in item_pool_count:
                 item_pool_count[name] = 0
             if item.code and item.can_create(self.multiworld, self.player):
-                item_pool.append(self.create_item(name))
-                item_pool_count[name] += 1
+                for i in range(0, item.num_exist):
+                    item_pool.append(self.create_item(name))
+                    item_pool_count[name] += 1
+                    self.num_items += 1
+        if self.num_items < self.num_locations:
+            filler_item_name = self.get_filler_item_name()
+            for i in range(0, self.num_locations - self.num_items):
+                item_pool.append(self.create_item(filler_item_name))
+                item_pool_count[filler_item_name] += 1
+                self.num_items += 1
 
         self.multiworld.itempool += item_pool
 
@@ -78,6 +89,9 @@ class TwitchWorld(World):
                 if location_data.region == region_name and location_data.can_create(self.multiworld, self.player)
             }, TwitchLocation)
             region.add_exits(region_data_table[region_name].connecting_regions)
+            self.num_locations += len(region.locations)
+
+        self.num_locations -= 1  # Strange Menu location...
 
         # Place locked locations.
         for location_name, location_data in locked_locations.items():
@@ -87,6 +101,7 @@ class TwitchWorld(World):
 
             locked_item = self.create_item(location_data_table[location_name].locked_item)
             self.multiworld.get_location(location_name, self.player).place_locked_item(locked_item)
+            self.num_locations -= 1
 
     def get_filler_item_name(self) -> str:
         return "out of pocket trug comment"

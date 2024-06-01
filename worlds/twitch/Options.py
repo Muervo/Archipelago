@@ -2,6 +2,8 @@ from dataclasses import dataclass
 
 from Options import PerGameCommonOptions, Range
 
+from .Locations import MAX_RPS_CHECKS
+
 
 #class HardMode(Toggle):
 #    """Only for the most masochistically inclined... Requires button activation!"""
@@ -69,7 +71,7 @@ class RPSChecks(Range):
     """The number of checks shuffled for rock-paper-scissors."""
     display_name = "Number of rock-paper-scissors checks"
     range_start = 0
-    range_end = 10
+    range_end = MAX_RPS_CHECKS
     default = 2
 
 
