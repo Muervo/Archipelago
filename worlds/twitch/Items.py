@@ -15,7 +15,7 @@ class TwitchItemData(NamedTuple):
 
 
 item_data_table: Dict[str, TwitchItemData] = {
-    "out of pocket trug comment": TwitchItemData(
+    "Progressive Luck": TwitchItemData(
         code=7339999,
         can_create=lambda multiworld, player: False
     ),

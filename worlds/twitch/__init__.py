@@ -37,6 +37,7 @@ class TwitchWorld(World):
     item_name_to_id = item_table
     num_locations = 0
     num_items = 0
+    luck_count = 0
 
     def generate_early(self):
         self.num_locations += 1  # First Chat
@@ -71,7 +72,9 @@ class TwitchWorld(World):
             for i in range(0, self.num_locations - self.num_items):
                 item_pool.append(self.create_item(filler_item_name))
                 item_pool_count[filler_item_name] += 1
-                self.num_items += 1
+                self.luck_count += 1
+
+        self.num_items += self.luck_count
 
         self.multiworld.itempool += item_pool
 
@@ -104,12 +107,18 @@ class TwitchWorld(World):
             self.num_locations -= 1
 
     def get_filler_item_name(self) -> str:
-        return "out of pocket trug comment"
+        return "Progressive Luck"
 
     def set_rules(self) -> None:
         options = self.fill_slot_data()
+        max_sides = dice[len(dice) - 1]
         for sides in dice:
             checks = options["d" + str(sides) + "_checks"]
+            if sides == dice[0]:
+                for i in range(1, checks + 1):
+                    checks = options["d" + str(sides) + "_checks"]
+                    self.multiworld.get_location("D" + str(sides) + ": Mystery Number " + str(i), self.player).access_rule = lambda state: state.has("D" + str(sides), self.player)
+                continue
             for i in range(1, checks + 1):
                 self.multiworld.get_location("D" + str(sides) + ": Mystery Number " + str(i), self.player).access_rule = lambda state: state.has("D" + str(sides), self.player)
 
@@ -128,5 +137,6 @@ class TwitchWorld(World):
             "d10_checks": self.options.d10_checks.value,
             "d12_checks": self.options.d12_checks.value,
             "d15_checks": self.options.d15_checks.value,
-            "rps_checks": self.options.rps_checks.value
+            "rps_checks": self.options.rps_checks.value,
+            "luck_count": self.luck_count
         }
