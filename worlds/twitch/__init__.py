@@ -1,13 +1,13 @@
 from typing import List
 from typing import Dict
 
-from BaseClasses import Region, Tutorial
+from BaseClasses import Region, Tutorial, ItemClassification
 from worlds.AutoWorld import WebWorld, World
-from .Items import TwitchItem, item_data_table, item_table
+from .Items import TwitchItem, MAX_LETTER_ITEMS, item_data_table, item_table
 from .Locations import dice, MAX_RPS_CHECKS, TwitchLocation, TwitchLocationData, location_data_table, location_table, locked_locations
 from .Options import TwitchOptions
 from .Regions import region_data_table
-#from .Rules import 
+from .Rules import has_all_letters
 
 
 class TwitchWebWorld(WebWorld):
@@ -35,31 +35,41 @@ class TwitchWorld(World):
     options: TwitchOptions
     location_name_to_id = location_table
     item_name_to_id = item_table
+    location_data_table_copy = {}
+    item_data_table_copy = {}
     num_locations = 0
     num_items = 0
     luck_count = 0
 
     def generate_early(self):
-        self.num_locations += 1  # First Chat
+        self.location_data_table_copy = location_data_table.copy()
         options = self.fill_slot_data()
+        victory_word = options["victory_word"]
+        if " " in victory_word:
+            raise Exception(f"You cannot put spaces in your victory word! ({victory_word})")
+        if len(victory_word) > 64:
+            raise Exception(f"Your word must be 64 characters or less! ({victory_word})")
         for sides in dice:
             checks = options["d" + str(sides) + "_checks"]
             for i in range(checks + 1, sides + 1):
                 check_str = "D" + str(sides) + ": Mystery Number " + str(i)
-                del location_data_table[check_str]
-                del location_table[check_str]
+                del self.location_data_table_copy[check_str]
         for i in range(options["rps_checks"] + 1, MAX_RPS_CHECKS + 1):
             check_str = "RPS: Check " + str(i)
-            del location_data_table[check_str]
-            del location_table[check_str]
-    
+            del self.location_data_table_copy[check_str]
+
+        self.item_data_table_copy = item_data_table.copy()
+        for i in range(len(self.options.victory_word.value) + 1, MAX_LETTER_ITEMS + 1):
+            item_str = "Letter " + str(i)
+            del self.item_data_table_copy[item_str]
+
     def create_item(self, name: str) -> TwitchItem:
-        return TwitchItem(name, item_data_table[name].type, item_data_table[name].code, self.player)
+        return TwitchItem(name, self.item_data_table_copy[name].type, self.item_data_table_copy[name].code, self.player)
 
     def create_items(self) -> None:
         item_pool: List[TwitchItem] = []
         item_pool_count: Dict[str, int] = {}
-        for name, item in item_data_table.items():
+        for name, item in self.item_data_table_copy.items():
             if name not in item_pool_count:
                 item_pool_count[name] = 0
             if item.code and item.can_create(self.multiworld, self.player):
@@ -73,7 +83,6 @@ class TwitchWorld(World):
                 item_pool.append(self.create_item(filler_item_name))
                 item_pool_count[filler_item_name] += 1
                 self.luck_count += 1
-
         self.num_items += self.luck_count
 
         self.multiworld.itempool += item_pool
@@ -88,21 +97,18 @@ class TwitchWorld(World):
         for region_name, region_data in region_data_table.items():
             region = self.multiworld.get_region(region_name, self.player)
             region.add_locations({
-                location_name: location_data.address for location_name, location_data in location_data_table.items()
+                location_name: location_data.address for location_name, location_data in self.location_data_table_copy.items()
                 if location_data.region == region_name and location_data.can_create(self.multiworld, self.player)
             }, TwitchLocation)
             region.add_exits(region_data_table[region_name].connecting_regions)
             self.num_locations += len(region.locations)
-
-        self.num_locations -= 1  # Strange Menu location...
-
         # Place locked locations.
         for location_name, location_data in locked_locations.items():
             # Ignore locations we never created.
             if not location_data.can_create(self.multiworld, self.player):
                 continue
 
-            locked_item = self.create_item(location_data_table[location_name].locked_item)
+            locked_item = self.create_item(self.location_data_table_copy[location_name].locked_item)
             self.multiworld.get_location(location_name, self.player).place_locked_item(locked_item)
             self.num_locations -= 1
 
@@ -125,7 +131,7 @@ class TwitchWorld(World):
         for i in range(1, options["rps_checks"] + 1):
             self.multiworld.get_location("RPS: Check " + str(i), self.player).access_rule = lambda state: state.has("RPS", self.player)
 
-        self.multiworld.get_location("Mystery Word", self.player).access_rule = lambda state: state.has("Letter 1", self.player) and state.has("Letter 2", self.player) and state.has("Letter 3", self.player) and state.has("Letter 4", self.player) and state.has("Letter 5", self.player)
+        self.multiworld.get_location("Victory Word", self.player).access_rule = lambda state: has_all_letters(state, self.player, len(self.options.victory_word.value))
 
         # Completion condition.
         self.multiworld.completion_condition[self.player] = lambda state: state.has("Victory", self.player)
@@ -138,5 +144,7 @@ class TwitchWorld(World):
             "d12_checks": self.options.d12_checks.value,
             "d15_checks": self.options.d15_checks.value,
             "rps_checks": self.options.rps_checks.value,
+            "victory_word": self.options.victory_word.value,
+            "victory_word_size": len(self.options.victory_word.value),
             "luck_count": self.luck_count
         }

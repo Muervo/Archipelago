@@ -43,29 +43,14 @@ item_data_table: Dict[str, TwitchItemData] = {
         code=7330005,
         type=ItemClassification.progression
     ),
-    "Letter 1": TwitchItemData(
-        code=7330011,
-        type=ItemClassification.progression
-    ),
-    "Letter 2": TwitchItemData(
-        code=7330012,
-        type=ItemClassification.progression
-    ),
-    "Letter 3": TwitchItemData(
-        code=7330013,
-        type=ItemClassification.progression
-    ),
-    "Letter 4": TwitchItemData(
-        code=7330014,
-        type=ItemClassification.progression
-    ),
-    "Letter 5": TwitchItemData(
-        code=7330015,
-        type=ItemClassification.progression
-    ),
     "Victory": TwitchItemData(
         type=ItemClassification.progression
     )
 }
+
+MAX_LETTER_ITEMS = 64
+
+for i in range(1, MAX_LETTER_ITEMS + 1):
+    item_data_table["Letter " + str(i)] = TwitchItemData(code=7330010 + i, type=ItemClassification.progression)
 
 item_table = {name: data.code for name, data in item_data_table.items() if data.code is not None}

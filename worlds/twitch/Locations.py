@@ -18,7 +18,7 @@ location_data_table: Dict[str, TwitchLocationData] = {
     "First Chat": TwitchLocationData(
         address=7330000
     ),
-    "Mystery Word": TwitchLocationData(
+    "Victory Word": TwitchLocationData(
         locked_item="Victory"
     )
 }

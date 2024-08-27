@@ -1,30 +1,8 @@
 from dataclasses import dataclass
 
-from Options import PerGameCommonOptions, Range
+from Options import PerGameCommonOptions, Range, FreeText, StartInventoryPool
 
 from .Locations import MAX_RPS_CHECKS
-
-
-#class HardMode(Toggle):
-#    """Only for the most masochistically inclined... Requires button activation!"""
-#    display_name = "Hard Mode"
-
-
-#class ButtonColor(Choice):
-#    """Customize your button! Now available in 12 unique colors."""
-#    display_name = "Button Color"
-#    option_red = 0
-#    option_orange = 1
-#    option_yellow = 2
-#    option_green = 3
-#    option_cyan = 4
-#    option_blue = 5
-#    option_magenta = 6
-#    option_purple = 7
-#    option_pink = 8
-#    option_brown = 9
-#    option_white = 10
-#    option_black = 11
 
 
 class D6Checks(Range):
@@ -75,6 +53,10 @@ class RPSChecks(Range):
     default = 2
 
 
+class VictoryWord(FreeText):
+    """The word to be guessed by the Audience to complete their goal."""
+    display_name = "Victory Word"
+
 @dataclass
 class TwitchOptions(PerGameCommonOptions):
     d6_checks: D6Checks
@@ -83,3 +65,5 @@ class TwitchOptions(PerGameCommonOptions):
     d12_checks: D12Checks
     d15_checks: D15Checks
     rps_checks: RPSChecks
+    victory_word: VictoryWord
+    start_inventory_from_pool: StartInventoryPool
