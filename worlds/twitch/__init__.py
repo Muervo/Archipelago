@@ -47,7 +47,7 @@ class TwitchWorld(World):
         victory_word = options["victory_word"]
         if " " in victory_word:
             raise Exception(f"You cannot put spaces in your victory word! ({victory_word})")
-        if len(victory_word) > 64:
+        if len(victory_word) > MAX_LETTER_ITEMS:
             raise Exception(f"Your word must be 64 characters or less! ({victory_word})")
         for sides in dice:
             checks = options["d" + str(sides) + "_checks"]
