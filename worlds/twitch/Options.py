@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from Options import PerGameCommonOptions, Range, FreeText, StartInventoryPool
+from Options import PerGameCommonOptions, Range, Toggle, FreeText, StartInventoryPool
 
 from .Locations import MAX_RPS_CHECKS
 
@@ -45,12 +45,25 @@ class D15Checks(Range):
     default = 2
 
 
+class D69Checks(Range):
+    """The number of checks shuffled for the D69 die."""
+    display_name = "Number of D69 checks"
+    range_start = 0
+    range_end = 69
+    default = 2
+
+
 class RPSChecks(Range):
     """The number of checks shuffled for rock-paper-scissors."""
     display_name = "Number of rock-paper-scissors checks"
     range_start = 0
     range_end = MAX_RPS_CHECKS
     default = 2
+
+
+class GiveSpaces(Toggle):
+    """Give spaces to the audience and remove the letter items for spaces."""
+    display_name = "Give Spaces"
 
 
 class VictoryWord(FreeText):
@@ -64,6 +77,8 @@ class TwitchOptions(PerGameCommonOptions):
     d10_checks: D10Checks
     d12_checks: D12Checks
     d15_checks: D15Checks
+    d69_checks: D69Checks
     rps_checks: RPSChecks
+    give_spaces: GiveSpaces
     victory_word: VictoryWord
     start_inventory_from_pool: StartInventoryPool

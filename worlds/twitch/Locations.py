@@ -23,7 +23,7 @@ location_data_table: Dict[str, TwitchLocationData] = {
     )
 }
 
-dice = [6, 8, 10, 12, 15]
+dice = [6, 8, 10, 12, 15, 69]
 
 MAX_RPS_CHECKS = 50
 

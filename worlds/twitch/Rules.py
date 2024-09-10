@@ -9,8 +9,9 @@ from BaseClasses import CollectionState, MultiWorld
 #
 #    return lambda state: True
 
-def has_all_letters(state, player, num_letters):
-    for i in range(1, num_letters + 1):
-        if not state.has("Letter " + str(i), player):
+def has_all_letters(state, player, characters, num_characters):
+    for i in range(1, num_characters + 1):
+        item_str = "Character " + str(i)
+        if (not state.has(item_str, player)) and (item_str in characters):
             return False
     return True

@@ -40,15 +40,14 @@ class TwitchWorld(World):
     num_locations = 0
     num_items = 0
     luck_count = 0
+    spaces_count = 0
 
     def generate_early(self):
         self.location_data_table_copy = location_data_table.copy()
         options = self.fill_slot_data()
         victory_word = options["victory_word"]
-        if " " in victory_word:
-            raise Exception(f"You cannot put spaces in your victory word! ({victory_word})")
         if len(victory_word) > MAX_LETTER_ITEMS:
-            raise Exception(f"Your word must be 64 characters or less! ({victory_word})")
+            raise Exception(f"Your word/phrase must be {MAX_LETTER_ITEMS} characters or less! ({victory_word})")
         for sides in dice:
             checks = options["d" + str(sides) + "_checks"]
             for i in range(checks + 1, sides + 1):
@@ -59,8 +58,14 @@ class TwitchWorld(World):
             del self.location_data_table_copy[check_str]
 
         self.item_data_table_copy = item_data_table.copy()
+        if self.options.give_spaces.value:
+            for i in range(1, len(self.options.victory_word.value) + 1):
+                if self.options.victory_word.value[i - 1] == " ":
+                    self.spaces_count += 1
+                    item_str = "Character " + str(i)
+                    del self.item_data_table_copy[item_str]
         for i in range(len(self.options.victory_word.value) + 1, MAX_LETTER_ITEMS + 1):
-            item_str = "Letter " + str(i)
+            item_str = "Character " + str(i)
             del self.item_data_table_copy[item_str]
 
     def create_item(self, name: str) -> TwitchItem:
@@ -131,7 +136,7 @@ class TwitchWorld(World):
         for i in range(1, options["rps_checks"] + 1):
             self.multiworld.get_location("RPS: Check " + str(i), self.player).access_rule = lambda state: state.has("RPS", self.player)
 
-        self.multiworld.get_location("Victory Word", self.player).access_rule = lambda state: has_all_letters(state, self.player, len(self.options.victory_word.value))
+        self.multiworld.get_location("Victory Word", self.player).access_rule = lambda state: has_all_letters(state, self.player, self.item_data_table_copy, len(self.options.victory_word.value))
 
         # Completion condition.
         self.multiworld.completion_condition[self.player] = lambda state: state.has("Victory", self.player)
@@ -143,7 +148,9 @@ class TwitchWorld(World):
             "d10_checks": self.options.d10_checks.value,
             "d12_checks": self.options.d12_checks.value,
             "d15_checks": self.options.d15_checks.value,
+            "d69_checks": self.options.d69_checks.value,
             "rps_checks": self.options.rps_checks.value,
+            "give_spaces": self.options.give_spaces.value,
             "victory_word": self.options.victory_word.value,
             "victory_word_size": len(self.options.victory_word.value),
             "luck_count": self.luck_count
