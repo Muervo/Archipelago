@@ -797,7 +797,7 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Zora Hall",
         address=0x3469420054C1E
     ),
-    "Pirates' Fortress Sewers HP": MMRLocationData(
+    "Pirates' Fortress Sewers Push Block Maze Chest": MMRLocationData(
         region="Pirates' Fortress Sewers",
         address=0x346942005230C
     ),
